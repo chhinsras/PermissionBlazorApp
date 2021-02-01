@@ -1,0 +1,82 @@
+﻿@page "/product"
+@inject IAuthorizationService AuthorizationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Product Management</h1>
+<br />
+
+
+@*<AuthorizeView Roles="@Roles.Basic.ToString()">
+    <a class="btn btn-success" href="product-list">Create</a>
+</AuthorizeView>
+<AuthorizeView Roles="@Roles.SuperAdmin.ToString()">
+    <button class="btn btn-success">Super Create</button>
+</AuthorizeView>
+<AuthorizeView Roles="@Roles.Admin.ToString()">
+    <button class="btn btn-success">Admin Create</button>
+</AuthorizeView>*@
+
+
+@*<AuthorizeView Policy="@Permissions.Products.View">
+        <button class="btn btn-success">View</button>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Permissions.Products.Edit">
+        <button class="btn btn-success">Edit</button>
+    </AuthorizeView>
+
+    <AuthorizeView Policy="@Permissions.Products.Delete">
+        <button class="btn btn-success">Delete</button>
+    </AuthorizeView>*@
+
+
+
+<AuthorizeView>
+    @if (@context.User.Claims.Count(c => c.Value == Permissions.Products.Create) != 0)
+    {
+        <a class="btn btn-success" href="product/create">Create</a>
+    }
+    @if (@context.User.Claims.Count(c => c.Value == Permissions.Products.Edit) != 0)
+    {
+        <a class="btn btn-warning">Edit</a>
+    }
+    @if (@context.User.Claims.Count(c => c.Value == Permissions.Products.View) != 0)
+    {
+        <a class="btn btn-primary" href="product-list">View</a>
+    }
+    @if (@context.User.Claims.Count(c => c.Value == Permissions.Products.Delete) != 0)
+    {
+        <a class="btn btn-danger">Delete</a>
+    }
+</AuthorizeView>
+
+@*@if ((AuthorizationService.AuthorizeAsync(authState.User, Permissions.Products.Create)).Result.Succeeded)
+{
+    <button class="btn btn-success">Create</button>
+}
+@if ((AuthorizationService.AuthorizeAsync(authState.User, Permissions.Products.View)).Result.Succeeded)
+{
+    <button class="btn btn-info">View</button>
+}
+@if ((AuthorizationService.AuthorizeAsync(authState.User, Permissions.Products.Edit)).Result.Succeeded)
+{
+    <button class="btn btn-warning">Modify</button>
+}
+@if ((AuthorizationService.AuthorizeAsync(authState.User, Permissions.Products.Delete)).Result.Succeeded)
+{
+    <button class="btn btn-danger">Delete</button>
+}*@
+
+@code {
+
+    AuthenticationState authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        // currentUser = authState.User;
+    }
+
+
+}

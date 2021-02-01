@@ -1,0 +1,83 @@
+﻿@page "/manageuserrole/{userId}"
+@inject HttpClient client
+@inject IJSRuntime js
+@inject NavigationManager uriHelper
+
+<h3>User Roles</h3>
+
+
+@if (manageUserRolesDto == null)
+{
+    <text>Loading...</text>
+}
+@*else if (manageUserRolesDto.Length == 0)
+    {
+        <text>No Records Found.</text>
+    }*@
+else
+{
+    <EditForm Model="@manageUserRolesDto" OnValidSubmit="@UpdateUserRoles">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < manageUserRolesDto.UserRoles.Count(); i++)
+                {
+                    int copy = i;
+                    <tr>
+                        <td>@manageUserRolesDto.UserRoles[i].RoleName</td>
+                        <td>
+                            <div class="form-check m-1">
+                                <input type="checkbox" 
+                                       @bind="@manageUserRolesDto.UserRoles[copy].Selected" 
+                                       />
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">
+            Submit
+        </button>
+    </EditForm>
+
+
+}
+@code {
+    [Parameter]
+    public string userId { get; set; }
+
+    ManageUserRolesDto manageUserRolesDto { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        manageUserRolesDto = await client.GetFromJsonAsync<ManageUserRolesDto>("api/userroles/" + userId);
+    }
+
+    private void checkUserRole(int i)
+    {
+        manageUserRolesDto.UserRoles[i].Selected = !manageUserRolesDto.UserRoles[i].Selected;
+
+    }
+
+
+
+    async Task UpdateUserRoles()
+    {
+        await client.PutAsJsonAsync("api/userroles/" + userId, manageUserRolesDto);
+        uriHelper.NavigateTo("user");
+
+    }
+
+
+    async Task ManagePermission(string roleId)
+    {
+
+    }
+}

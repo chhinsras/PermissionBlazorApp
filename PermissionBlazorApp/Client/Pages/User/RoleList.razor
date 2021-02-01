@@ -1,0 +1,77 @@
+﻿@page "/role"
+@inject HttpClient client
+@inject IJSRuntime js
+
+<h3>Roles</h3>
+<small>Add as many role as you wish.</small>
+    <div class="form-group">
+        <input @bind:event="oninput" @bind="roleRequest.Name" />
+        <a>@roleRequest.Name</a>
+
+    </div>
+    <button type="submit" @onclick="AddNewRole" class="btn btn-success">
+        Submit
+    </button>
+
+<br>
+
+@if (roles == null)
+{
+    <text>Loading...</text>
+}
+else if (roles.Length == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Role Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (RoleDto role in roles)
+            {
+                <tr>
+                    <td>@role.Id</td>
+                    <td>@role.Name</td>
+                    <td>
+                        
+                        <a class="btn btn-success" href="rolepermission/@role.Id">Manage Permission</a>
+                        <a class="btn btn-success" href="role/edit/@role.Id">Edit</a>
+                        <button class="btn btn-danger" @onclick="@(() => Delete(role.Id))">Delete</button>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+@code {
+    RoleDto[] roles { get; set; }
+    RoleRequest roleRequest { get; set; } = new RoleRequest();
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await client.GetFromJsonAsync<RoleDto[]>("api/roles");
+    }
+
+    async Task AddNewRole()
+    {
+        await client.PostAsJsonAsync("api/roles", roleRequest);
+        await OnInitializedAsync();
+    }
+
+    async Task Delete(string roleId)
+    {
+        var role = roles.First(x => x.Id == roleId);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete {role.Name}'s ({role.Id}) Record?"))
+        {
+            await client.DeleteAsync($"api/role/{roleId}");
+            await OnInitializedAsync();
+        }
+    }
+}

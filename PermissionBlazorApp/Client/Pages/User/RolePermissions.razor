@@ -1,0 +1,84 @@
+﻿@page "/rolepermission/{roleId}"
+@inject HttpClient client
+@inject IJSRuntime js
+@inject NavigationManager uriHelper
+
+<h3>Roles</h3>
+<small>Add as many role as you wish.</small>
+<br />
+<EditForm Model="@permissionDto" OnValidSubmit="@UpdateRolePermissions">
+    <div class="card">
+        <div id="viewAll" class="card-body table-responsive">
+            <input asp-for="@permissionDto.RoleId" type="hidden" />
+            <table class="table table-striped" id="permissionTable">
+                <thead>
+                    <tr>
+                        <th>
+                            Type
+                        </th>
+                        <th>
+                            Permission
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (permissionDto.RoleClaims != null)
+                    {
+                        @for (int i = 0; i < permissionDto.RoleClaims.Count(); i++)
+                        {
+                            int copy = i;
+                            <tr>
+                                <td>
+                                    <input @bind="@permissionDto.RoleClaims[i].Type" type="hidden" />
+                                    @permissionDto.RoleClaims[i].Type
+                                </td>
+                                <td>
+                                    <input @bind="@permissionDto.RoleClaims[i].Value" type="hidden" />
+                                    @permissionDto.RoleClaims[i].Value
+                                </td>
+                                <td>
+                                    <div class="form-check m-1">
+                                        <input type="checkbox" @bind="@permissionDto.RoleClaims[copy].Selected" class="form-check-input" />
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <div class="col-sm-12" style="padding: 20px 20px 0px 0px">
+                <button type="submit" id="save" class="btn btn-success">
+                    <i class="fa fa-check"></i>
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public string roleId { get; set; }
+
+    PermissionDto permissionDto = new PermissionDto();
+
+    CurrentUser currentUser = new CurrentUser();
+
+    protected override async Task OnInitializedAsync()
+    {
+        permissionDto = await client.GetFromJsonAsync<PermissionDto>("api/permission/allPermission/" + roleId);
+    }
+
+    async Task UpdateRolePermissions()
+    {
+        await client.PutAsJsonAsync("api/permission", permissionDto);
+        uriHelper.NavigateTo("role");
+        //  await OnInitializedAsync();
+    }
+
+
+}

@@ -1,0 +1,68 @@
+﻿@page "/user"
+@inject HttpClient client
+@inject IJSRuntime js
+
+<h3>Users</h3>
+<small>Add as many users as you wish.</small>
+<div class="form-group">
+    <a class="btn btn-success" href="user/create"><i class="oi oi-plus"></i> Create New</a>
+</div>
+<br>
+
+@if (users == null)
+{
+    <text>Loading...</text>
+}
+else if (users.Length == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>UserName</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (UserDto user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>
+                        <a class="btn btn-success" href="manageuserrole/@user.Id">Manage Roles</a>
+                        <a class="btn btn-success" href="user/edit/@user.Id">Edit</a>
+                        <button class="btn btn-danger" @onclick="@(() => Delete(user.Id))">Delete</button>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+@code {
+    UserDto[] users { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        users = await client.GetFromJsonAsync<UserDto[]>("api/users");
+    }
+
+    async Task Delete(string userId)
+    {
+        var user = users.First(x => x.Id == userId);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete {user.UserName}'s ({user.Id}) Record?"))
+        {
+            await client.DeleteAsync($"api/user/{userId}");
+            await OnInitializedAsync();
+        }
+    }
+
+    async Task ManageRole(string userId)
+    {
+
+    }
+}
