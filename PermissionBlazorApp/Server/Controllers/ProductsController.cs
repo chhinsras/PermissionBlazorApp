@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -61,7 +62,9 @@ namespace PermissionBlazorApp.Server.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                var oldProduct = await _context.Products.FindAsync(id);
+                _context.Entry(oldProduct).CurrentValues.SetValues(product);
+                await _context.SaveChangesAsync(User?.FindFirst(ClaimTypes.NameIdentifier).Value);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -85,7 +88,7 @@ namespace PermissionBlazorApp.Server.Controllers
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
             _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(User?.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             return CreatedAtAction("GetProduct", new { id = product.Id }, product);
         }
@@ -102,7 +105,7 @@ namespace PermissionBlazorApp.Server.Controllers
             }
 
             _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(User?.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             return NoContent();
         }
