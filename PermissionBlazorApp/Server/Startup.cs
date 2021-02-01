@@ -57,10 +57,11 @@ namespace PermissionBlazorApp.Server
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(Permissions.Products.Create, policy => policy.RequireClaim(Permissions.Products.Create));
-                options.AddPolicy(Permissions.Products.Edit, policy => policy.RequireClaim(Permissions.Products.Edit));
-                options.AddPolicy(Permissions.Products.View, policy => policy.RequireClaim(Permissions.Products.View));
-                options.AddPolicy(Permissions.Products.Delete, policy => policy.RequireClaim(Permissions.Products.Delete));
+                options.AddPolicy(Permissions.Products.Create, policy => policy.RequireClaim("Permission", Permissions.Products.Create));
+                options.AddPolicy(Permissions.Products.Edit, policy => policy.RequireClaim("Permission", Permissions.Products.Edit));
+                options.AddPolicy(Permissions.Products.View, policy => policy.RequireClaim("Permission", Permissions.Products.View));
+                options.AddPolicy(Permissions.Products.Delete, policy => policy.RequireClaim("Permission", Permissions.Products.Delete));
+
             });
 
         }

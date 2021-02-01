@@ -25,7 +25,7 @@ namespace PermissionBlazorApp.Server.Controllers
 
         // GET: api/Products
         [HttpGet]
-       // [Authorize (Policy = Permissions.Products.View)]
+        [Authorize (Policy = Permissions.Products.View)]
         public async Task<ActionResult<List<Product>>> GetProducts()
         {
             return await _context.Products.ToListAsync();
@@ -81,7 +81,7 @@ namespace PermissionBlazorApp.Server.Controllers
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-       // [Authorize(Policy = Permissions.Products.Create)]
+        [Authorize(Policy = Permissions.Products.Create)]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
             _context.Products.Add(product);
