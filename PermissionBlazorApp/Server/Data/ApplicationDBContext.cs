@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PermissionBlazorApp.Server.Data
 {
-    public class ApplicationDBContext : IdentityDbContext<IdentityUser, IdentityRole, string,
+    public class ApplicationDBContext : IdentityDbContext<AppUser, IdentityRole, string,
                     IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>,
                     IdentityRoleClaim<string>, IdentityUserToken<string>>
     {

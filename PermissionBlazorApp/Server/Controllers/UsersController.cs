@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PermissionBlazorApp.Server.Models;
+using PermissionBlazorApp.Server.Services;
 using PermissionBlazorApp.Shared.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +15,13 @@ namespace PermissionBlazorApp.Server.Controllers
     [Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        public UsersController(UserManager<IdentityUser> userManager)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IUserService _userService;
+
+        public UsersController(UserManager<AppUser> userManager, IUserService userService)
         {
             _userManager = userManager;
+            _userService = userService;
         }
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> ListUsers()
@@ -37,6 +42,14 @@ namespace PermissionBlazorApp.Server.Controllers
             }
 
             return Ok(users);
+        }
+
+        [HttpPost("token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTokenAsync(TokenRequestModel model)
+        {
+            var result = await _userService.GetTokenAsync(model);
+            return Ok(result);
         }
     }
 }

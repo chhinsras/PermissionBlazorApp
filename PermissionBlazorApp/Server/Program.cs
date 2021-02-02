@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PermissionBlazorApp.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace PermissionBlazorApp.Server
                 var logger = loggerFactory.CreateLogger("app");
                 try
                 {
-                    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                    var userManager = services.GetRequiredService<UserManager<AppUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     await Seeds.DefaultRoles.SeedAsync(userManager, roleManager);
                     await Seeds.DefaultUsers.SeedBasicUserAsync(userManager, roleManager);

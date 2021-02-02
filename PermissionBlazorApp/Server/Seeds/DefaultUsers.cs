@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PermissionBlazorApp.Server.Constants;
+using PermissionBlazorApp.Server.Models;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace PermissionBlazorApp.Server.Seeds
 {
     public static class DefaultUsers
     {
-        public static async Task SeedBasicUserAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedBasicUserAsync(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            var defaultUser = new IdentityUser
+            var defaultUser = new AppUser
             {
                 UserName = "basicuser@gmail.com",
                 Email = "basicuser@gmail.com",
@@ -26,9 +27,9 @@ namespace PermissionBlazorApp.Server.Seeds
                 }
             }
         }
-        public static async Task SeedSuperAdminAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedSuperAdminAsync(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            var defaultUser = new IdentityUser
+            var defaultUser = new AppUser
             {
                 UserName = "superadmin@gmail.com",
                 Email = "superadmin@gmail.com",

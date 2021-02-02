@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PermissionBlazorApp.Server.Models;
 using PermissionBlazorApp.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,12 @@ namespace PermissionBlazorApp.Server.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        public AuthController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -33,10 +35,19 @@ namespace PermissionBlazorApp.Server.Controllers
             return Ok();
         }
 
+
+        //[HttpPost("token")]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> GetTokenAsync(TokenRequestModel model)
+        //{
+        //    var result = await _userService.GetTokenAsync(model);
+        //    return Ok(result);
+        //}
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterRequest parameters)
         {
-            var user = new IdentityUser();
+            var user = new AppUser();
             user.UserName = parameters.UserName;
             var result = await _userManager.CreateAsync(user, parameters.Password);
             if (!result.Succeeded) return BadRequest(result.Errors.FirstOrDefault()?.Description);

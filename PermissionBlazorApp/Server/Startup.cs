@@ -11,9 +11,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using PermissionBlazorApp.Server.Data;
+using PermissionBlazorApp.Server.Models;
 using PermissionBlazorApp.Server.Permission;
+using PermissionBlazorApp.Server.Services;
+using PermissionBlazorApp.Server.Settings;
 using PermissionBlazorApp.Shared.Constants;
+using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,37 +37,90 @@ namespace PermissionBlazorApp.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-           // services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-           // services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            //Configuration from AppSettings
+            services.Configure<JWT>(Configuration.GetSection("JWT"));
+
+            //User Manager Service
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            //Adding DB Context with MSSQL
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDBContext>()
                 .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<IdentityUser>>()
+                .AddSignInManager<SignInManager<AppUser>>()
                 .AddDefaultTokenProviders();
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.HttpOnly = false;
-                options.Events.OnRedirectToLogin = context =>
+            services.AddScoped<IUserService, UserService>();
+
+            //services.ConfigureApplicationCookie(options =>
+            //{
+            //    options.Cookie.HttpOnly = false;
+            //    options.Events.OnRedirectToLogin = context =>
+            //    {
+            //        context.Response.StatusCode = 401;
+            //        return Task.CompletedTask;
+            //    };
+            //});
+
+            //Adding Athentication - JWT
+            //services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //    .AddJwtBearer(o =>
+            //    {
+            //        o.RequireHttpsMetadata = false;
+            //        o.SaveToken = false;
+            //        o.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuerSigningKey = true,
+            //            ValidateIssuer = true,
+            //            ValidateAudience = true,
+            //            ValidateLifetime = true,
+            //            ClockSkew = TimeSpan.Zero,
+            //            ValidIssuer = Configuration["JWT:Issuer"],
+            //            ValidAudience = Configuration["JWT:Audience"],
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Key"]))
+            //        };
+            //    });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
-            });
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Token:Key"])),
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["Token:Issuer"],
+                        ValidateAudience = false
+                    };
+                });
+
             services.AddControllers().AddNewtonsoftJson();
             services.AddControllersWithViews();
             services.AddRazorPages();
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(Permissions.Products.Create, policy => policy.RequireClaim("Permission", Permissions.Products.Create));
-                options.AddPolicy(Permissions.Products.Edit, policy => policy.RequireClaim("Permission", Permissions.Products.Edit));
-                options.AddPolicy(Permissions.Products.View, policy => policy.RequireClaim("Permission", Permissions.Products.View));
-                options.AddPolicy(Permissions.Products.Delete, policy => policy.RequireClaim("Permission", Permissions.Products.Delete));
-
+                // Here I stored necessary permissions/roles in a constant
+                foreach (var prop in typeof(Permissions).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+                {
+                    options.AddPolicy(prop.GetValue(null).ToString(), policy => policy.RequireClaim("Permission", prop.GetValue(null).ToString()));
+                }
             });
+
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy(Permissions.Products.Create, policy => policy.RequireClaim("Permission", Permissions.Products.Create));
+            //    options.AddPolicy(Permissions.Products.Edit, policy => policy.RequireClaim("Permission", Permissions.Products.Edit));
+            //    options.AddPolicy(Permissions.Products.View, policy => policy.RequireClaim("Permission", Permissions.Products.View));
+            //    options.AddPolicy(Permissions.Products.Delete, policy => policy.RequireClaim("Permission", Permissions.Products.Delete));
+
+            //});
 
         }
 

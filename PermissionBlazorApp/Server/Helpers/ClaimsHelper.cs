@@ -25,7 +25,7 @@ namespace PermissionBlazorApp.Server.Helpers
             if (!allClaims.Any(a => a.Type == "Permission" && a.Value == permission))
             {
                 await roleManager.AddClaimAsync(role, new Claim("Permission", permission));
-            }
+             }
         }
     }
 }
